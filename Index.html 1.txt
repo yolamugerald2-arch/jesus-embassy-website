@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jesus Embassy For All Nations - Lilongwe</title>
+<style>
+body{margin:0;background:#070707;color:#fff;font-family:Arial, sans-serif;text-align:center}
+.top{padding:15px;background:#0a0a0a;border-bottom:1px solid #d4af37;display:flex;justify-content:space-between;align-items:center}
+.logo{color:#d4af37;font-weight:bold;letter-spacing:1px}
+.hero{padding:50px 20px;background:radial-gradient(circle at top,#2a2210,#070707)}
+h1{color:#e6c55a;font-size:38px;margin:20px 0;line-height:1.2}
+.btn{display:inline-block;background:linear-gradient(90deg,#e6c55a,#b8941f);color:#000;padding:16px 36px;border-radius:40px;text-decoration:none;font-weight:800;margin:10px;font-size:18px}
+.btn2{background:transparent;border:1px solid #d4af37;color:#d4af37}
+.verse{color:#c9b989;max-width:700px;margin:30px auto;line-height:1.6;font-style:italic}
+</style>
+</head>
+<body>
+<div class="top">
+<div class="logo">JE - JESUS EMBASSY FOR ALL NATIONS</div>
+<div style="color:#d4af37;font-size:12px">HOME | ABOUT | CONTACT</div>
+</div>
+
+<div class="hero">
+<div style="width:120px;height:120px;border:2px solid #d4af37;border-radius:50%;margin:0 auto;line-height:120px;color:#d4af37;font-size:40px;font-weight:bold">JE 🌱</div>
+<h1>JESUS EMBASSY FOR ALL NATIONS<br>STARTING SOON IN LILONGWE</h1>
+<h2 style="color:#fff;letter-spacing:4px">JOIN THE PIONEER TEAM</h2>
+<p style="color:#d4af37;letter-spacing:4px;font-weight:bold">RECEIVE • PLANT • SEE GROWTH</p>
+<div class="verse">
+"It is like a mustard seed, which, when it is sown in the ground, is smaller than all the seeds on earth. Yet when it is sown, it grows up and becomes larger than all the garden plants..." — Mark 4:30-32<br><br>
+We are currently a Home Fellowship in Lilongwe. No building yet — just the seed, the Word, and pioneers. Be part of the beginning.
+</div>
+
+<a class="btn" href="https://wa.me/265885914196">WhatsApp +265 885 914 196</a><br>
+<a class="btn btn2" href="https://wa.me/265993250016">Second Line +265 993 250 016</a><br>
+<a class="btn btn2" href="mailto:yolamugerald2@gmail.com">yolamugerald2@gmail.com</a>
+
+<p style="margin-top:50px;color:#888">HOME FELLOWSHIP • LILONGWE • LAUNCHING SOON<br>Sunday 9:00 AM CAT | Contact WhatsApp for location</p>
+<p style="color:#555">© 2026 Jesus Embassy For All Nations</p>
+</div>
+</body>
+</html>
