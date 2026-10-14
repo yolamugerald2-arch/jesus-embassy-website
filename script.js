@@ -1,8 +1,8 @@
 // Update the details below before publishing. Use digits only for WhatsApp, including country code.
 const MINISTRY_SETTINGS = {
-  whatsappNumber: "265993250016", // Primary ministry WhatsApp number
+  whatsappNumber: "265885914196", // Primary ministry WhatsApp number
   email: "yolamugerald2@gmail.com", // Ministry contact email
-  secondaryWhatsappNumber: "265885914196", // Secondary WhatsApp number
+  secondaryWhatsappNumber: "265993250016", // Secondary WhatsApp number
   location: "Malawi · Online ministry"
 };
 
