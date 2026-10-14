@@ -38,11 +38,6 @@ textarea {
   font: inherit;
 }
 
-button,
-a {
-  -webkit-tap-highlight-color: transparent;
-}
-
 img {
   max-width: 100%;
 }
@@ -260,10 +255,6 @@ h2 em {
 .section {
   padding: 90px 10%;
   border-top: 1px solid rgba(212, 175, 98, 0.1);
-}
-
-.kicker {
-  margin-bottom: 35px;
 }
 
 .two-col,
