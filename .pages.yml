@@ -1,0 +1,68 @@
+
+media:
+  input: assets
+  output: /assets
+
+content:
+  - name: sermons
+    label: Sermons
+    type: collection
+    path: content/sermons
+    filename: "{primary}.md"
+    fields:
+      - name: title
+        label: Sermon title
+        type: string
+        required: true
+      - name: date
+        label: Date
+        type: date
+      - name: description
+        label: Description
+        type: text
+      - name: video_url
+        label: Video link
+        type: string
+      - name: audio_url
+        label: Audio link
+        type: string
+      - name: body
+        label: Teaching notes
+        type: rich-text
+
+  - name: events
+    label: Ministry Events
+    type: collection
+    path: content/events
+    filename: "{primary}.md"
+    fields:
+      - name: title
+        label: Event title
+        type: string
+        required: true
+      - name: date
+        label: Event date
+        type: date
+      - name: description
+        label: Description
+        type: text
+      - name: location
+        label: Venue
+        type: string
+
+  - name: resources
+    label: Teaching Resources
+    type: collection
+    path: content/resources
+    filename: "{primary}.md"
+    fields:
+      - name: title
+        label: Resource title
+        type: string
+        required: true
+      - name: description
+        label: Description
+        type: text
+      - name: file
+        label: PDF or resource link
+        type: string
