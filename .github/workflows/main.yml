@@ -1,0 +1,32 @@
+
+name: Version 4 Preview
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Version 4
+        uses: actions/checkout@v4
+        with:
+          ref: version-4
+
+      - name: Prepare preview
+        run: |
+          mkdir -p preview
+          cp index.html styles.css script.js cms-content.js preview/
+          cp -r assets content preview/
+
+      - name: Upload preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: jesus-embassy-version-4-preview
+          path: preview/
+          retention-days: 7
