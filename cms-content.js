@@ -1,8 +1,7 @@
 
-/*
- * JESUS EMBASSY — FOR ALL NATIONS
- * CMS content connector
- */
+/* JESUS EMBASSY — FOR ALL NATIONS
+   CMS content connector
+*/
 
 const CMS_REPOSITORY = "yolamugerald2-arch/jesus-embassy-website";
 const CMS_BRANCH = "version-4";
@@ -41,13 +40,10 @@ function cmsParseFrontMatter(markdown) {
 
   if (!match) return fields;
 
-  let currentKey = "";
-
   for (const line of match[1].split(/\r?\n/)) {
     const field = line.match(/^([a-zA-Z0-9_-]+):\s*(.*)$/);
 
     if (field) {
-      currentKey = field[1];
       let value = field[2].trim();
 
       if (
@@ -57,38 +53,37 @@ function cmsParseFrontMatter(markdown) {
         value = value.slice(1, -1);
       }
 
-      fields[currentKey] = value;
-    } else if (currentKey && /^\s+/.test(line)) {
-      fields[currentKey] += "\n" + line.trim();
+      fields[field[1]] = value;
     }
   }
 
   return fields;
 }
 
-function cmsCard(item, collectionPath) {
+function cmsCard(item) {
   const title = cmsEscape(item.title || "Untitled");
   const description = cmsEscape(item.description || "");
   const date = cmsEscape(item.date || "");
   const venue = cmsEscape(item.location || "");
-  const video = item.video_url || "";
-  const audio = item.audio_url || "";
-  const file = item.file || "";
 
-  let extraLinks = "";
+  let links = "";
 
-  if (video.startsWith("https://") || video.startsWith("http://")) {
-    extraLinks += ` <a href="${cmsEscape(video)}" target="_blank" rel="noopener noreferrer">Watch video</a>`;
-  }
-
-  if (audio.startsWith("https://") || audio.startsWith("http://")) {
-    extraLinks += ` <a href="${cmsEscape(audio)}" target="_blank" rel="noopener noreferrer">Listen to audio</a>`;
-  }
-
-  if (file.startsWith("https://") || file.startsWith("http://")) {
-    extraLinks += ` <a href="${cmsEscape(file)}" target="_blank" rel="noopener noreferrer">Open resource</a>`;
-  } else if (file.startsWith("/assets/")) {
-    extraLinks += ` <a href="${cmsEscape(file)}" target="_blank" rel="noopener noreferrer">Open resource</a>`;
+  for (const [url, label] of [
+    [item.video_url, "Watch video"],
+    [item.audio_url, "Listen to audio"],
+    [item.file, "Open resource"]
+  ]) {
+    if (
+      typeof url === "string" &&
+      /^https?:\/\//i.test(url)
+    ) {
+      links += `<a href="${cmsEscape(url)}" target="_blank" rel="noopener noreferrer">${label}</a>`;
+    } else if (
+      typeof url === "string" &&
+      url.startsWith("/assets/")
+    ) {
+      links += `<a href="${cmsEscape(url)}" target="_blank" rel="noopener noreferrer">${label}</a>`;
+    }
   }
 
   return `
@@ -97,7 +92,7 @@ function cmsCard(item, collectionPath) {
       ${date ? `<p class="cms-content-date">${date}</p>` : ""}
       ${venue ? `<p>${venue}</p>` : ""}
       ${description ? `<p>${description.replace(/\n/g, "<br>")}</p>` : ""}
-      ${extraLinks ? `<p class="cms-content-links">${extraLinks}</p>` : ""}
+      ${links ? `<p class="cms-content-links">${links}</p>` : ""}
     </article>
   `;
 }
@@ -106,7 +101,6 @@ async function cmsLoadCollection(collection) {
   const target = document.getElementById(collection.target);
   if (!target) return;
 
-  target.setAttribute("aria-live", "polite");
   target.innerHTML = "<p>Loading ministry content…</p>";
 
   try {
@@ -126,8 +120,9 @@ async function cmsLoadCollection(collection) {
     }
 
     const files = await response.json();
-    const markdownFiles = files.filter(
-      file => file.type === "file" && file.name.endsWith(".md")
+
+    const markdownFiles = files.filter(file =>
+      file.type === "file" && file.name.endsWith(".md")
     );
 
     if (!markdownFiles.length) {
@@ -138,6 +133,7 @@ async function cmsLoadCollection(collection) {
     const entries = await Promise.all(
       markdownFiles.map(async file => {
         const fileResponse = await fetch(file.download_url);
+
         if (!fileResponse.ok) return null;
 
         const markdown = await fileResponse.text();
@@ -145,15 +141,15 @@ async function cmsLoadCollection(collection) {
       })
     );
 
-    const validEntries = entries.filter(Boolean);
+    const validEntries = entries.filter(item => item && item.title);
 
     target.innerHTML = validEntries.length
-      ? validEntries.map(item => cmsCard(item, collection.path)).join("")
+      ? validEntries.map(cmsCard).join("")
       : `<p>${cmsEscape(collection.empty)}</p>`;
   } catch (error) {
     console.error("CMS content loading failed:", error);
     target.innerHTML =
-      `<p>Content could not load right now. Please try again later.</p>`;
+      "<p>Content could not load right now. Please try again later.</p>";
   }
 }
 
