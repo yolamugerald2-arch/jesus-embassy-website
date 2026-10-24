@@ -1,16 +1,23 @@
 
-name: Version 4 Preview
+name: Publish Version 4 Website
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - version-4
 
 permissions:
   contents: read
   pages: write
   id-token: write
 
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
 jobs:
-  preview:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Version 4
@@ -18,15 +25,27 @@ jobs:
         with:
           ref: version-4
 
-      - name: Prepare preview
-        run: |
-          mkdir -p preview
-          cp index.html styles.css script.js cms-content.js preview/
-          cp -r assets content preview/
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
 
-      - name: Upload preview
-        uses: actions/upload-artifact@v4
+      - name: Prepare website
+        run: |
+          mkdir -p public
+          cp index.html styles.css script.js cms-content.js public/
+          cp -r assets content public/
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: jesus-embassy-version-4-preview
-          path: preview/
-          retention-days: 7
+          path: public
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
