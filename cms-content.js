@@ -1,6 +1,6 @@
 
 /* JESUS EMBASSY — FOR ALL NATIONS
-   CMS content connector
+   Full CMS content connector
 */
 
 const CMS_REPOSITORY = "yolamugerald2-arch/jesus-embassy-website";
@@ -10,17 +10,20 @@ const CMS_COLLECTIONS = [
   {
     path: "content/sermons",
     target: "cms-sermons",
-    empty: "Sermons will appear here soon."
+    empty: "Sermons will appear here soon.",
+    type: "sermon"
   },
   {
     path: "content/events",
     target: "cms-events",
-    empty: "Ministry events will be announced here."
+    empty: "Ministry events will be announced here.",
+    type: "event"
   },
   {
     path: "content/resources",
     target: "cms-resources",
-    empty: "Teaching resources will be available here soon."
+    empty: "Teaching resources will be available here soon.",
+    type: "resource"
   }
 ];
 
@@ -34,64 +37,154 @@ function cmsEscape(value) {
   })[char]);
 }
 
-function cmsParseFrontMatter(markdown) {
-  const match = markdown.match(/^---\s*\r?\n([\s\S]*?)\r?\n---/);
+function cmsParseMarkdown(markdown) {
+  const match = markdown.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*(?:\r?\n|$)/);
   const fields = {};
 
-  if (!match) return fields;
+  let body = markdown;
 
-  for (const line of match[1].split(/\r?\n/)) {
-    const field = line.match(/^([a-zA-Z0-9_-]+):\s*(.*)$/);
+  if (match) {
+    for (const line of match[1].split(/\r?\n/)) {
+      const field = line.match(/^([a-zA-Z0-9_-]+):\s*(.*)$/);
+      if (field) {
+        let value = field[2].trim();
 
-    if (field) {
-      let value = field[2].trim();
+        if (
+          (value.startsWith('"') && value.endsWith('"')) ||
+          (value.startsWith("'") && value.endsWith("'"))
+        ) {
+          value = value.slice(1, -1);
+        }
 
-      if (
-        (value.startsWith('"') && value.endsWith('"')) ||
-        (value.startsWith("'") && value.endsWith("'"))
-      ) {
-        value = value.slice(1, -1);
+        fields[field[1]] = value;
       }
+    }
 
-      fields[field[1]] = value;
+    body = markdown.slice(match[0].length).trim();
+  }
+
+  return { fields, body };
+}
+
+/* Convert common Markdown formatting into safe HTML. */
+function cmsFormatInline(text) {
+  let result = cmsEscape(text);
+
+  result = result.replace(
+    /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+    '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'
+  );
+
+  result = result.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+  result = result.replace(/\*(.+?)\*/g, "<em>$1</em>");
+  result = result.replace(/`([^`]+)`/g, "<code>$1</code>");
+
+  return result;
+}
+
+function cmsFormatMarkdown(markdown) {
+  const lines = String(markdown || "").replace(/\r/g, "").split("\n");
+  const output = [];
+  let paragraph = [];
+  let listType = null;
+
+  function flushParagraph() {
+    if (paragraph.length) {
+      output.push("<p>" + paragraph.map(cmsFormatInline).join("<br>") + "</p>");
+      paragraph = [];
     }
   }
 
-  return fields;
+  function closeList() {
+    if (listType) {
+      output.push(`</${listType}>`);
+      listType = null;
+    }
+  }
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+
+    if (!line) {
+      flushParagraph();
+      closeList();
+      continue;
+    }
+
+    const heading = line.match(/^(#{1,4})\s+(.+)$/);
+    if (heading) {
+      flushParagraph();
+      closeList();
+
+      const level = Math.min(heading[1].length + 1, 5);
+      output.push(`<h${level}>${cmsFormatInline(heading[2])}</h${level}>`);
+      continue;
+    }
+
+    if (/^---+$/.test(line)) {
+      flushParagraph();
+      closeList();
+      output.push("<hr>");
+      continue;
+    }
+
+    const unordered = line.match(/^[-*]\s+(.+)$/);
+    const ordered = line.match(/^\d+[.)]\s+(.+)$/);
+
+    if (unordered || ordered) {
+      flushParagraph();
+
+      const nextType = unordered ? "ul" : "ol";
+      if (listType !== nextType) {
+        closeList();
+        output.push(`<${nextType}>`);
+        listType = nextType;
+      }
+
+      output.push(`<li>${cmsFormatInline((unordered || ordered)[1])}</li>`);
+      continue;
+    }
+
+    closeList();
+    paragraph.push(line);
+  }
+
+  flushParagraph();
+  closeList();
+
+  return output.join("\n");
 }
 
-function cmsCard(item) {
-  const title = cmsEscape(item.title || "Untitled");
-  const description = cmsEscape(item.description || "");
-  const date = cmsEscape(item.date || "");
-  const venue = cmsEscape(item.location || "");
+function cmsCard(item, collection) {
+  const fields = item.fields;
+  const title = cmsEscape(fields.title || "Untitled");
+  const description = cmsEscape(fields.description || "");
+  const date = cmsEscape(fields.date || "");
+  const location = cmsEscape(fields.location || "");
+  const body = cmsFormatMarkdown(item.body);
 
   let links = "";
 
   for (const [url, label] of [
-    [item.video_url, "Watch video"],
-    [item.audio_url, "Listen to audio"],
-    [item.file, "Open resource"]
+    [fields.video_url, "Watch video"],
+    [fields.audio_url, "Listen to audio"],
+    [fields.file, "Open resource"]
   ]) {
     if (
       typeof url === "string" &&
-      /^https?:\/\//i.test(url)
+      (/^https?:\/\//i.test(url) || url.startsWith("/assets/"))
     ) {
-      links += `<a href="${cmsEscape(url)}" target="_blank" rel="noopener noreferrer">${label}</a>`;
-    } else if (
-      typeof url === "string" &&
-      url.startsWith("/assets/")
-    ) {
-      links += `<a href="${cmsEscape(url)}" target="_blank" rel="noopener noreferrer">${label}</a>`;
+      links += `<a href="${cmsEscape(url)}" target="_blank" rel="noopener noreferrer">${label}</a> `;
     }
   }
 
   return `
-    <article class="cms-content-card">
+    <article class="cms-content-card cms-${collection.type}-card">
       <h3>${title}</h3>
       ${date ? `<p class="cms-content-date">${date}</p>` : ""}
-      ${venue ? `<p>${venue}</p>` : ""}
-      ${description ? `<p>${description.replace(/\n/g, "<br>")}</p>` : ""}
+      ${location ? `<p>${location}</p>` : ""}
+      ${description ? `<p class="cms-content-description">${description}</p>` : ""}
+      ${body ? `<div class="cms-full-content">${body}</div>` : ""}
       ${links ? `<p class="cms-content-links">${links}</p>` : ""}
     </article>
   `;
@@ -122,7 +215,7 @@ async function cmsLoadCollection(collection) {
     const files = await response.json();
 
     const markdownFiles = files.filter(file =>
-      file.type === "file" && file.name.endsWith(".md")
+      file.type === "file" && /\.md$/i.test(file.name)
     );
 
     if (!markdownFiles.length) {
@@ -137,14 +230,28 @@ async function cmsLoadCollection(collection) {
         if (!fileResponse.ok) return null;
 
         const markdown = await fileResponse.text();
-        return cmsParseFrontMatter(markdown);
+        const parsed = cmsParseMarkdown(markdown);
+
+        if (!parsed.fields.title) return null;
+
+        return {
+          fields: parsed.fields,
+          body: parsed.body,
+          filename: file.name
+        };
       })
     );
 
-    const validEntries = entries.filter(item => item && item.title);
+    const validEntries = entries
+      .filter(Boolean)
+      .sort((a, b) =>
+        String(b.fields.date || "").localeCompare(
+          String(a.fields.date || "")
+        )
+      );
 
     target.innerHTML = validEntries.length
-      ? validEntries.map(cmsCard).join("")
+      ? validEntries.map(item => cmsCard(item, collection)).join("")
       : `<p>${cmsEscape(collection.empty)}</p>`;
   } catch (error) {
     console.error("CMS content loading failed:", error);
