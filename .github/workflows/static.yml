@@ -10,7 +10,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: pages
   cancel-in-progress: false
 
 jobs:
@@ -25,58 +25,14 @@ jobs:
         with:
           ref: version-4
 
-      - name: Prepare website files
-        run: |
-          mkdir -p _site
-          cp index.html styles.css script.js cms-content.js _site/
-          cp -r assets content _site/
-
       - name: Setup Pages
         uses: actions/configure-pages@v5
-
-      - name: Upload website
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: _site
-
-      - name: Deploy website
-        id: deployment
-        uses: actions/deploy-pages@v4
-
-name: Publish Version 4 Website
-
-on:
-  workflow_dispatch:
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
-
-jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Version 4
-        uses: actions/checkout@v4
-        with:
-          ref: version-4
 
       - name: Prepare website files
         run: |
           mkdir -p _site
           cp index.html styles.css script.js cms-content.js _site/
           cp -r assets content _site/
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
 
       - name: Upload website
         uses: actions/upload-pages-artifact@v3
