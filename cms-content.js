@@ -227,12 +227,18 @@ async function cmsLoadCollection(collection) {
       markdownFiles.map(async file => {
         const fileResponse = await fetch(file.download_url);
 
-        if (!fileResponse.ok) return null;
+       if (!fileResponse.ok) {
+  console.error("CMS file request failed:", fileUrl, fileResponse.status);
+  return null;
+}
 
-        const markdown = await fileResponse.text();
-        const parsed = cmsParseMarkdown(markdown);
+const markdown = await fileResponse.text();
+const parsed = cmsParseMarkdown(markdown);
 
-        if (!parsed.fields.title) return null;
+if (!parsed.fields.title) {
+  console.error("CMS file has no title:", fileUrl, markdown);
+  return null;
+}
 
         return {
           fields: parsed.fields,
