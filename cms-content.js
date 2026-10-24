@@ -39,36 +39,50 @@ function cmsEscape(value) {
 }
 
 /* Read title, date, description and other front-matter fields. */
+
 function cmsParseMarkdown(markdown) {
-  const match = markdown.match(
-    /^---\s*\r?\n([\s\S]*?)\r?\n---\s*(?:\r?\n|$)/
-  );
+  const text = String(markdown || "")
+    .replace(/^\uFEFF/, "")
+    .replace(/\r\n/g, "\n")
+    .trim();
 
   const fields = {};
-  let body = markdown;
+  const lines = text.split("\n");
+  let bodyStart = 0;
 
-  if (match) {
-    for (const line of match[1].split(/\r?\n/)) {
-      const field = line.match(/^([a-zA-Z0-9_-]+):\s*(.*)$/);
+  if (lines[0]?.trim() === "---") {
+    const endIndex = lines.findIndex(
+      (line, index) => index > 0 && line.trim() === "---"
+    );
 
-      if (field) {
-        let value = field[2].trim();
+    if (endIndex !== -1) {
+      for (const line of lines.slice(1, endIndex)) {
+        const field = line.match(/^([a-zA-Z0-9_-]+):\s*(.*)$/);
 
-        if (
-          (value.startsWith('"') && value.endsWith('"')) ||
-          (value.startsWith("'") && value.endsWith("'"))
-        ) {
-          value = value.slice(1, -1);
+        if (field) {
+          let value = field[2].trim();
+
+          if (
+            (value.startsWith('"') && value.endsWith('"')) ||
+            (value.startsWith("'") && value.endsWith("'"))
+          ) {
+            value = value.slice(1, -1);
+          }
+
+          fields[field[1]] = value;
         }
-
-        fields[field[1]] = value;
       }
-    }
 
-    body = markdown.slice(match[0].length).trim();
+      bodyStart = endIndex + 1;
+    }
   }
 
-  return { fields, body };
+  return {
+    fields,
+    body: lines.slice(bodyStart).join("\n").trim()
+  };
+}
+
 }
 
 /* Format inline Markdown safely. */
