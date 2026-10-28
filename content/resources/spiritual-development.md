@@ -2,7 +2,7 @@
 title: Spiritual Development
 date: 2026-10-28
 description: Biblical teaching to help believers grow in their relationship with Christ.
-file: /assets/spiritual-development.pdf
+file: /assets/Jesus_Embassy_Spiritual_Development_Study_Guide.pdf
 ---
 
 ## Overview
