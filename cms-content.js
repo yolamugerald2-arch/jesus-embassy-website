@@ -83,7 +83,7 @@ function cmsParseMarkdown(markdown) {
   };
 }
 
-}
+
 
 /* Format inline Markdown safely. */
 function cmsFormatInline(text) {
