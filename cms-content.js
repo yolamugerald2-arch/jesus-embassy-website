@@ -206,11 +206,12 @@ function cmsCard(item, collection) {
     [fields.audio_url, "Listen to audio"],
     [fields.file, "Open resource"]
   ]) {
-    if (
+        if (
       typeof url === "string" &&
       (
         /^https?:\/\//i.test(url) ||
-        url.startsWith("/assets/")
+        url.startsWith("/assets/") ||
+        url.startsWith("/jesus-embassy-website/assets/")
       )
     ) {
       links +=
